@@ -21,30 +21,31 @@ const updateVideos = (videoData) => {
         console.error('Error updating videos data:', err);
     }
 };
-router.get("/videos", (req, res) => {
+
+router.get("/", (req, res) => {
     const videos = getVideos();
 
-    const getNextVideos = videos.map(video => ({
+    const formattedVideos = videos.map(video => ({
         id: video.id,
         title: video.title,
         channel: video.channel,
         image: video.image
     }));
-    res.status(200).json({ getNextVideos }); 
+
+    res.status(200).json(formattedVideos);
 });
 
-router.get("/videos/:videoId", (req, res) => {
-    const { videoId } = req.params;
+router.get("/:id", (req, res) => {
     const videos = getVideos();
-    const foundVideo = videos.find(video => video.id === videoId);
+    const foundVideo = videos.find(video => video.id === req.params.id);
     if (foundVideo) {
-        res.status(200).json(foundVideo); 
+        res.status(200).json(foundVideo);
     } else {
         res.status(404).json({ error: 'Video not found' });
     }
 });
 
-router.post("/videos", (req, res) => {
+router.post("/", (req, res) => {
     const { title, description } = req.body;
     if (!title || !description) {
         return res.status(400).json({ error: 'Please include a title and description' });
@@ -54,7 +55,7 @@ router.post("/videos", (req, res) => {
         id: uuidv4(),
         title,
         description,
-        image: '/images/hardcoded.jpg',
+        image: 'http://localhost:8080/images/hardcoded.jpg',
         channel: "Harmit Sidhu",
         views: 0,
         likes: 0,
@@ -70,16 +71,15 @@ router.post("/videos", (req, res) => {
     res.status(201).json({ message: 'New video created', video: newVideo });
 });
 
-router.post("/videos/:videoId/comments", (req, res) => {
-    const { videoId } = req.params;
-    const { comment } = req.body;
+router.post("/:id/comments", (req, res) => {
+    const { text } = req.body;
 
-    if (!comment) {
-        return res.status(400).json({ error: 'Please include a comment' });
+    if (!text) {
+        return res.status(400).json({ error: 'Please include a comment text' });
     }
 
     const videos = getVideos();
-    const videoIndex = videos.findIndex(video => video.id === videoId);
+    const videoIndex = videos.findIndex(video => video.id === req.params.id);
 
     if (videoIndex === -1) {
         return res.status(404).json({ error: 'Video not found' });
@@ -87,11 +87,10 @@ router.post("/videos/:videoId/comments", (req, res) => {
 
     const newComment = {
         id: uuidv4(),
-        text: comment,
+        text,
         timestamp: Date.now()
     };
 
-    
     videos[videoIndex].comments.push(newComment);
     updateVideos(videos);
 
