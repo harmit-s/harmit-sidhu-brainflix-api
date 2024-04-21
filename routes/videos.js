@@ -33,7 +33,7 @@ router.get("/videos", (req, res) => {
     res.status(200).json({ getNextVideos }); 
 });
 
-router.get("/:videoId", (req, res) => {
+router.get("/videos/:videoId", (req, res) => {
     const { videoId } = req.params;
     const videos = getVideos();
     const foundVideo = videos.find(video => video.id === videoId);
@@ -44,7 +44,7 @@ router.get("/:videoId", (req, res) => {
     }
 });
 
-router.post("/", (req, res) => {
+router.post("/videos", (req, res) => {
     const { title, description } = req.body;
     if (!title || !description) {
         return res.status(400).json({ error: 'Please include a title and description' });
@@ -68,6 +68,34 @@ router.post("/", (req, res) => {
     updateVideos(videos);
 
     res.status(201).json({ message: 'New video created', video: newVideo });
+});
+
+router.post("/videos/:videoId/comments", (req, res) => {
+    const { videoId } = req.params;
+    const { comment } = req.body;
+
+    if (!comment) {
+        return res.status(400).json({ error: 'Please include a comment' });
+    }
+
+    const videos = getVideos();
+    const videoIndex = videos.findIndex(video => video.id === videoId);
+
+    if (videoIndex === -1) {
+        return res.status(404).json({ error: 'Video not found' });
+    }
+
+    const newComment = {
+        id: uuidv4(),
+        text: comment,
+        timestamp: Date.now()
+    };
+
+    
+    videos[videoIndex].comments.push(newComment);
+    updateVideos(videos);
+
+    res.status(201).json({ message: 'New comment added', comment: newComment });
 });
 
 export default router;
