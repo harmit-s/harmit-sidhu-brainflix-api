@@ -21,15 +21,22 @@ const updateVideos = (videoData) => {
         console.error('Error updating videos data:', err);
     }
 };
-router.get("/", (req, res) => {
+router.get("/videos", (req, res) => {
     const videos = getVideos();
-    res.status(200).json({ videos }); 
+
+    const getNextVideos = videos.map(video => ({
+        id: video.id,
+        title: video.title,
+        channel: video.channel,
+        image: video.image
+    }));
+    res.status(200).json({ getNextVideos }); 
 });
 
 router.get("/:videoId", (req, res) => {
     const { videoId } = req.params;
     const videos = getVideos();
-    const foundVideo = videos.find(video => video.id === parseInt(videoId));
+    const foundVideo = videos.find(video => video.id === videoId);
     if (foundVideo) {
         res.status(200).json(foundVideo); 
     } else {
@@ -47,12 +54,12 @@ router.post("/", (req, res) => {
         id: uuidv4(),
         title,
         description,
-        imageUrl: '/images/hardcoded.jpg',
+        image: '/images/hardcoded.jpg',
         channel: "Harmit Sidhu",
         views: 0,
         likes: 0,
         duration: "3:01",
-        timestamp: new Date().toLocaleString(),
+        timestamp: Date.now(),
         comments: []
     };
 
@@ -63,4 +70,4 @@ router.post("/", (req, res) => {
     res.status(201).json({ message: 'New video created', video: newVideo });
 });
 
-module.exports = router;
+export default router;

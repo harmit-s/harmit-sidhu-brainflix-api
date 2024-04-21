@@ -1,30 +1,25 @@
-
 import express from 'express';
 import cors from 'cors';
+import videosRouter from './routes/videos.js';
+import dotenv from 'dotenv';
 
+dotenv.config();
 
 const app = express();
 
 
-app.use(cors()); // any site can access
-app.use(express.json()); // have to use to get post body
+app.use(cors()); 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-app.use("/public", express.static('images'));
+app.use(express.static('public'));
 
+app.use('/', videosRouter);
 
-
-app.route("/")
-  .get((req, res) => {res.status(200).json("Works!")})
-  .post((req, res) => res.status(200).json("Works!"))
-
-
-app.use("/videos", (req, res, next) => {
-  const { api_key } = req.query;
-  if(!api_key) return res.status(401).json("unauthorized request");
-  next();
-})
-
-app.use("/videos", videoRoutes);
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Internal Server Error' });
+});
 
 const PORT = process.env.PORT || 3000;
 
