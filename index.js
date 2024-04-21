@@ -1,4 +1,4 @@
-import fs from 'fs';
+
 import express from 'express';
 import cors from 'cors';
 
@@ -11,18 +11,6 @@ app.use(express.json()); // have to use to get post body
 
 app.use("/public", express.static('images'));
 
-
-import videoRoutes from './routes/videos.js';
-
-const getVideos = () => {
-    return JSON.parse(fs.readFileSync('./data/videos.json'));
-}
-  
-  const updateVideos = (videoData) => {
-    fs.writeFileSync('./data/videos.json', JSON.stringify(videoData));
-}
-
-const get
 
 
 app.route("/")
